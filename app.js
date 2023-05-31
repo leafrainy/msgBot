@@ -26,14 +26,14 @@ async function tgSetHook(){
 
 //telegramwebhook调用
 async function tgHookMsg(msg,chat_id=0){
-    
+    var body
     if(chat_id){
-       const body =  {
+       body =  {
             chat_id: chat_id,
             text: msg
         } 
     }else{
-        const body =  {
+        body =  {
             chat_id: TG_CHAT_ID,
             text: msg
         }
