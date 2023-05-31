@@ -11,36 +11,29 @@ const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
 
 const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/tgwebhook';
 
-const TG_USER = process.env.TG_USER;
+const TG_CHAT_ID = process.env.TG_CHAT_ID;
 
 const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
 
 //telegram 设置webhook
 async function tgSetHook(){
-    await axios.post(`${TELEGRAM_API_URL}${TG_BOT_TOKEN}/setWebhook`, {
-      url: TG_HOOK_URL
-    })
-    .then((response) => {
-        
-        console.log(response.data);
-      
-    })
-    .catch((error) => {
-         console.log(error);
-    });
+    const res = await axios.post(`${TELEGRAM_API_URL}${TG_BOT_TOKEN}/setWebhook`, {url: TG_HOOK_URL})
+    if(res.data.ok){
+        return res.data.description;
+    }
 }
 
-//telegram webhook调用
+//telegramwebhook调用
 async function tgHookMsg(msg,chat_id=0){
-    var body;
+    
     if(chat_id){
-       body =  {
+       const body =  {
             chat_id: chat_id,
             text: msg
         } 
     }else{
-        body =  {
-            chat_id: TG_USER,
+        const body =  {
+            chat_id: TG_CHAT_ID,
             text: msg
         }
     }
@@ -48,7 +41,11 @@ async function tgHookMsg(msg,chat_id=0){
     
     const res = await axios.post(`${TELEGRAM_API_URL}${TG_BOT_TOKEN}/sendMessage`,body)
     
-    console.log(res);
+    if(res.data.ok){
+        return "SUCCESS";
+    }else{
+        return "ERROR";
+    }
     
 } 
 
@@ -86,6 +83,7 @@ async function wxHookMsg(msg,type='text'){
     }
     
 } 
+
 
 /**
  * @api {POST} /sendwx 企业微信消息发送接口
@@ -141,12 +139,10 @@ app.get('/settghook', async (req, res) => {
  * @apiName tgwebhook
  * @apiGroup 设置
  * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "code": 200,
- *       "msg": "SUCCESS"
+ *       "code": 200
  *     }
  */
 app.post('/tgwebhook', async (req, res) => {
@@ -188,4 +184,3 @@ app.post('/sendtg', async (req, res) => {
 
 // 启动express server 
 app.listen(80);
-
