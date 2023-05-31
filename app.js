@@ -13,7 +13,6 @@ const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/sendtg';
 
 const TG_USER = process.env.TG_USER;
 
-
 //telegram 设置webhook
 async function tgSetHook(){
     await axios.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/setWebhook`, {
