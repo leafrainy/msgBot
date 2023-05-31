@@ -9,33 +9,44 @@ const WX_HOOK_KEY = process.env.WX_HOOK_KEY;
 
 const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
 
-const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/sendtg';
+const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/tgwebhook';
 
 const TG_USER = process.env.TG_USER;
 
+const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
+
 //telegram 设置webhook
 async function tgSetHook(){
-    await axios.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/setWebhook`, {
+    await axios.post(`${TELEGRAM_API_URL}${TG_BOT_TOKEN}/setWebhook`, {
       url: TG_HOOK_URL
     })
     .then((response) => {
-        console.log(response);
-      return `Telegram Bot API response: ${response.status} ${response.statusText}`;
+        
+        console.log(response.data);
+      
     })
     .catch((error) => {
          console.log(error);
-      return error;
     });
 }
 
 //telegramwebhook调用
-async function tgHookMsg(msg,type='text'){
+async function tgHookMsg(msg,chat_id=0){
     
-    const body =  {
-        chat_id: TG_USER,
-        text: msg
+    if(chat_id){
+       const body =  {
+            chat_id: chat_id,
+            text: msg
+        } 
+    }else{
+        const body =  {
+            chat_id: TG_USER,
+            text: msg
+        }
     }
-    const res = await axios.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,body)
+    
+    
+    const res = await axios.post(`${TELEGRAM_API_URL}${TG_BOT_TOKEN}/sendMessage`,body)
     
     console.log(res);
     
@@ -123,6 +134,29 @@ app.get('/settghook', async (req, res) => {
   const msgStatus = await tgSetHook();
   
   res.send({code:200,msg:msgStatus});
+  
+});
+
+/**
+ * @api {POST} /tgwebhook telegram webhook
+ * @apiName tgwebhook
+ * @apiGroup 设置
+ * @apiSuccess {Number} code 状态码 默认200
+ * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "code": 200,
+ *       "msg": "SUCCESS"
+ *     }
+ */
+app.post('/tgwebhook', async (req, res) => {
+  const chatId = req.body.message.chat.id;  
+  const message = "你的chat_id为"+chatId;
+  
+  await tgHookMsg(message,chatId);
+  
+  res.sendStatus(200);
   
 });
 
