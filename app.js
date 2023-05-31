@@ -4,6 +4,7 @@ const app = express();
 app.use(express.json());
 app.use('/docs', express.static('docs'));
 
+
 //配置项
 const WX_HOOK_KEY = process.env.WX_HOOK_KEY;
 
