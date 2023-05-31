@@ -87,7 +87,6 @@ async function wxHookMsg(msg,type='text'){
     
 } 
 
-
 /**
  * @api {POST} /sendwx 企业微信消息发送接口
  * @apiName sendwx
