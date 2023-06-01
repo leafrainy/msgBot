@@ -8,6 +8,8 @@ app.use('/docs', express.static('docs'));
 //配置项
 const WX_HOOK_KEY = process.env.WX_HOOK_KEY;
 
+const SLACK_HOOK_URL = process.env.SLACK_HOOK_URL;
+
 const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
 
 const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/tgwebhook';
@@ -86,6 +88,21 @@ async function wxHookMsg(msg,type='text'){
 } 
 
 
+
+//slack webhook调用
+async function slackHookMsg(msg){
+    
+    const webhook = `${SLACK_HOOK_URL}`;
+
+    const body = {
+        text:msg
+    }
+    
+    await axios.post(webhook, body);
+
+    return "SUCCESS";
+} 
+
 /**
  * @api {POST} /sendwx 企业微信消息发送接口
  * @apiName sendwx
@@ -113,6 +130,34 @@ app.post('/sendwx', async (req, res) => {
   res.send({code:200,msg:msgStatus});
   
 });
+
+
+/**
+ * @api {POST} /sendslack slack消息发送接口
+ * @apiName sendslack
+ * @apiGroup 发送消息
+ * @apiBody  {String} message 消息内容
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "message": "要发送的消息"
+ *     }
+ * @apiSuccess {Number} code 状态码 默认200
+ * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "code": 200,
+ *       "msg": "SUCCESS"
+ *     }
+ */
+app.post('/sendslack', async (req, res) => {
+    const { message } = req.body;  
+    
+    const msgStatus = await slackHookMsg(message);
+    
+    res.send({code:200,msg:msgStatus});
+    
+  });
 
 /**
  * @api {GET} /settghook telegram设置webhook
