@@ -6,6 +6,8 @@ app.use('/docs', express.static('docs'));
 
 
 //配置项
+const MYWX_HOOK_URL = process.env.MYWX_HOOK_URL;
+
 const WX_HOOK_KEY = process.env.WX_HOOK_KEY;
 
 const SLACK_HOOK_URL = process.env.SLACK_HOOK_URL;
@@ -17,6 +19,29 @@ const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/tgwebhook';
 const TG_CHAT_ID = process.env.TG_CHAT_ID;
 
 const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
+
+
+//个人微信发消息
+async function myWxHookMsg(msg,to){
+    
+    var body =  {
+        type:"Q0001",
+        data:{
+            wxid: to,
+            msg: msg
+        }
+        
+    }
+    
+    const res = await axios.post(MYWX_HOOK_URL,body)
+    console.log(res);
+    if(res.data.code==200){
+        return "SUCCESS";
+    }else{
+        return "ERROR";
+    }
+    
+} 
 
 //telegram 设置webhook
 async function tgSetHook(){
@@ -223,6 +248,17 @@ app.post('/sendtg', async (req, res) => {
   const { message } = req.body;  
   
   const msgStatus = await tgHookMsg(message);
+  
+  res.send({code:200,msg:msgStatus});
+  
+});
+
+//个人微信发消息
+app.get('/sendmywx', async (req, res) => {
+  const { to,message } = req.query;  
+  console.log(req.query);
+  
+  const msgStatus = await myWxHookMsg(message,to);
   
   res.send({code:200,msg:msgStatus});
   
