@@ -1,7 +1,7 @@
 import axios from 'axios';
 import express from 'express';
 import apn from '@parse/node-apn';
-
+import path from 'path';
 const app = express();
 app.use(express.json());
 
@@ -50,9 +50,11 @@ async function myWxHookMsg(msg,to){
 }
 // ios bark发送消息
 async function apnMsg(msg,to){
+	const filePath = path.join(process.cwd(), 'public', 'bark.p8');
+
 	var options = {
 	  token: {
-	    key: 'public/bark.p8',
+	    key: filePath,
 	    keyId: "LH4T9V5U4R",
 	    teamId: "5U8LBRXG3A"
 	  },
