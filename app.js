@@ -4,8 +4,6 @@ import apn from '@parse/node-apn';
 
 const app = express();
 app.use(express.json());
-app.use('/docs', express.static('docs'));
-
 
 //配置项
 const WX_APPID = process.env.WX_APPID;
@@ -54,7 +52,7 @@ async function myWxHookMsg(msg,to){
 async function apnMsg(msg,to){
 	var options = {
 	  token: {
-	    key: 'bark.p8',
+	    key: '/public/bark.p8',
 	    keyId: "LH4T9V5U4R",
 	    teamId: "5U8LBRXG3A"
 	  },
