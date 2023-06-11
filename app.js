@@ -67,7 +67,7 @@ async function sendTemplateMessage(data) {
   const response = await axios.post(url, postData);
   const result = response.data;
   if (result.errcode === 0) {
-    return "SUCCESS;
+    return "SUCCESS";
   } else {
     return "ERROR";
   }
