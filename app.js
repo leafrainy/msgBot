@@ -6,6 +6,12 @@ app.use('/docs', express.static('docs'));
 
 
 //配置项
+const WX_APPID = process.env.WX_APPID;
+const WX_APPSECRET = process.env.WX_APPSECRET;
+const WX_OPENID = process.env.WX_OPENID;
+const WX_TEMPLATEID = process.env.WX_TEMPLATEID;
+
+
 const MYWX_HOOK_URL = process.env.MYWX_HOOK_URL;
 
 const WX_HOOK_KEY = process.env.WX_HOOK_KEY;
@@ -42,6 +48,30 @@ async function myWxHookMsg(msg,to){
     }
     
 } 
+//微信公众号 获取token
+async function getAccessToken() {
+  const response = await axios.get(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${WX_APPID}&secret=${WX_APPSECRET}`);
+  const accessToken = response.data.access_token;
+  return accessToken;
+}
+
+//微信公众号 发送模板消息
+async function sendTemplateMessage(data) {
+  const accessToken = await getAccessToken();
+  const url = `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${accessToken}`;
+  const postData = {
+    touser: WX_OPENID,
+    template_id: WX_TEMPLATEID,
+    data: data
+  };
+  const response = await axios.post(url, postData);
+  const result = response.data;
+  if (result.errcode === 0) {
+    return "SUCCESS;
+  } else {
+    return "ERROR";
+  }
+}
 
 //telegram 设置webhook
 async function tgSetHook(){
@@ -248,6 +278,37 @@ app.post('/sendtg', async (req, res) => {
   const { message } = req.body;  
   
   const msgStatus = await tgHookMsg(message);
+  
+  res.send({code:200,msg:msgStatus});
+  
+});
+
+/**
+ * @api {POST} /sendwxtemp 微信公众号消息发送接口
+ * @apiName sendwxtemp
+ * @apiGroup 发送消息
+ * @apiBody  {String} message 消息内容
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "message": "要发送的消息"
+ *     }
+ * @apiSuccess {Number} code 状态码 默认200
+ * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "code": 200,
+ *       "msg": "SUCCESS"
+ *     }
+ */
+app.post('/sendwxtemp', async (req, res) => {
+  const { message } = req.body;  
+  const data = {
+      "message": {
+        "value": message
+      }
+    }
+  const msgStatus = await sendTemplateMessage(data);
   
   res.send({code:200,msg:msgStatus});
   
