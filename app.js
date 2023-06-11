@@ -52,7 +52,7 @@ async function myWxHookMsg(msg,to){
 async function apnMsg(msg,to){
 	var options = {
 	  token: {
-	    key: '/public/bark.p8',
+	    key: './public/bark.p8',
 	    keyId: "LH4T9V5U4R",
 	    teamId: "5U8LBRXG3A"
 	  },
