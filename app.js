@@ -1,5 +1,7 @@
 import axios from 'axios';
 import express from 'express';
+import apn from '@parse/node-apn';
+
 const app = express();
 app.use(express.json());
 app.use('/docs', express.static('docs'));
@@ -47,7 +49,40 @@ async function myWxHookMsg(msg,to){
         return "ERROR";
     }
     
-} 
+}
+// ios bark发送消息
+async function apnMsg(msg,to){
+	var options = {
+	  token: {
+	    key: 'bark.p8',
+	    keyId: "LH4T9V5U4R",
+	    teamId: "5U8LBRXG3A"
+	  },
+	  production: true
+	};
+	
+	var apnProvider = new apn.Provider(options);
+	
+	var note = new apn.Notification();
+	
+	note.alert = {
+		"title":"消息提醒",
+		"body":msg
+	};
+	note.topic = "me.fin.bark";
+	note.mutableContent = true;
+	note.sound = "default";
+	
+	const res = await apnProvider.send(note, to).then( (result) => {
+	  if(!result.failed.length){
+		  return "SUCCESS";
+	  }else{
+		  return "ERROR";
+	  }
+	});
+	
+	return res;
+}
 //微信公众号 获取token
 async function getAccessToken() {
   const response = await axios.get(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${WX_APPID}&secret=${WX_APPSECRET}`);
@@ -309,6 +344,34 @@ app.post('/sendwxtemp', async (req, res) => {
       }
     }
   const msgStatus = await sendTemplateMessage(data);
+  
+  res.send({code:200,msg:msgStatus});
+  
+});
+
+
+/**
+ * @api {POST} /sendbark bark发送接口
+ * @apiName sendbark
+ * @apiGroup 发送消息
+ * @apiBody  {String} message 消息内容
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "message": "要发送的消息"
+ *     }
+ * @apiSuccess {Number} code 状态码 默认200
+ * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "code": 200,
+ *       "msg": "SUCCESS"
+ *     }
+ */
+app.post('/sendbark', async (req, res) => {
+  const { message,to } = req.body;  
+ 
+  const msgStatus = await apnMsg(message,to);
   
   res.send({code:200,msg:msgStatus});
   
