@@ -11,19 +11,12 @@ const WX_APPSECRET = process.env.WX_APPSECRET;
 const WX_OPENID = process.env.WX_OPENID;
 const WX_TEMPLATEID = process.env.WX_TEMPLATEID;
 
-
 const MYWX_HOOK_URL = process.env.MYWX_HOOK_URL;
-
 const WX_HOOK_KEY = process.env.WX_HOOK_KEY;
-
 const SLACK_HOOK_URL = process.env.SLACK_HOOK_URL;
-
 const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
-
 const TG_HOOK_URL = "https://"+process.env.TG_HOOK_URL+'/tgwebhook';
-
 const TG_CHAT_ID = process.env.TG_CHAT_ID;
-
 const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
 
 
@@ -36,11 +29,8 @@ async function myWxHookMsg(msg,to){
             wxid: to,
             msg: msg
         }
-        
     }
-    
     const res = await axios.post(MYWX_HOOK_URL,body)
-    console.log(res);
     if(res.data.code==200){
         return "SUCCESS";
     }else{
@@ -51,8 +41,7 @@ async function myWxHookMsg(msg,to){
 // ios bark发送消息
 async function apnMsg(msg,to){
 	const filePath = path.join(process.cwd(), 'public', 'bark.p8');
-
-	var options = {
+	const options = {
 	  token: {
 	    key: filePath,
 	    keyId: "LH4T9V5U4R",
@@ -61,10 +50,8 @@ async function apnMsg(msg,to){
 	  production: true
 	};
 	
-	var apnProvider = new apn.Provider(options);
-	
+	const apnProvider = new apn.Provider(options);
 	var note = new apn.Notification();
-	
 	note.alert = {
 		"title":"消息提醒",
 		"body":msg
@@ -72,7 +59,6 @@ async function apnMsg(msg,to){
 	note.topic = "me.fin.bark";
 	note.mutableContent = true;
 	note.sound = "default";
-	
 	const res = await apnProvider.send(note, to).then( (result) => {
 	  if(!result.failed.length){
 		  return "SUCCESS";
@@ -130,18 +116,13 @@ async function tgHookMsg(msg,chat_id=0){
             text: msg
         }
     }
-    
-    
     const res = await axios.post(`${TELEGRAM_API_URL}${TG_BOT_TOKEN}/sendMessage`,body)
-    
     if(res.data.ok){
         return "SUCCESS";
     }else{
         return "ERROR";
     }
-    
 } 
-
 
 //企业微信webhook调用
 async function wxHookMsg(msg,type='text'){
@@ -167,212 +148,78 @@ async function wxHookMsg(msg,type='text'){
                 } 
             }
     }
-    
     const res= await axios.post(webhook, body);
     if(res.data.errcode){
         return res.data.errmsg;
     }else{
         return "SUCCESS";
     }
-    
 } 
 
 
 
 //slack webhook调用
 async function slackHookMsg(msg){
-    
     const webhook = `${SLACK_HOOK_URL}`;
-
     const body = {
         text:msg
     }
-    
     await axios.post(webhook, body);
-
     return "SUCCESS";
 } 
 
-/**
- * @api {POST} /sendwx 企业微信消息发送接口
- * @apiName sendwx
- * @apiGroup 发送消息
- * @apiBody  {String} message 消息内容
- * @apiBody  {String} [type='text'] 消息类型 默认text，可选markdown
- * @apiParamExample {json} Request-Example:
- *     {
- *       "message": "要发送的消息"
- *     }
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200,
- *       "msg": "SUCCESS"
- *     }
- */
-app.post('/sendwx', async (req, res) => {
-  const { message , type } = req.body;  
-
+//企业微信消息发送接口
+app.get('/sendwx', async (req, res) => {
+  const { message , type } = req.query;  
   const msgStatus = await wxHookMsg(message,type);
-  
   res.send({code:200,msg:msgStatus});
-  
 });
 
-
-/**
- * @api {POST} /sendslack slack消息发送接口
- * @apiName sendslack
- * @apiGroup 发送消息
- * @apiBody  {String} message 消息内容
- * @apiParamExample {json} Request-Example:
- *     {
- *       "message": "要发送的消息"
- *     }
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200,
- *       "msg": "SUCCESS"
- *     }
- */
-app.post('/sendslack', async (req, res) => {
-    const { message } = req.body;  
-    
+// slack消息发送接口
+app.get('/sendslack', async (req, res) => {
+    const { message } = req.query;  
     const msgStatus = await slackHookMsg(message);
-    
     res.send({code:200,msg:msgStatus});
-    
   });
 
-/**
- * @api {GET} /settghook telegram设置webhook
- * @apiName settghook
- * @apiGroup 设置
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 设置状态
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200,
- *       "msg": "something"
- *     }
- */
+//telegram设置webhook
 app.get('/settghook', async (req, res) => {
-
   const msgStatus = await tgSetHook();
-  
   res.send({code:200,msg:msgStatus});
-  
 });
 
-/**
- * @api {POST} /tgwebhook telegram webhook
- * @apiName tgwebhook
- * @apiGroup 设置
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200
- *     }
- */
+// telegram webhook
 app.post('/tgwebhook', async (req, res) => {
   const chatId = req.body.message.chat.id;  
   const message = "你的chat_id为"+chatId;
-  
   await tgHookMsg(message,chatId);
-  
   res.sendStatus(200);
-  
 });
 
-/**
- * @api {POST} /sendtg telegram消息发送接口
- * @apiName sendtg
- * @apiGroup 发送消息
- * @apiBody  {String} message 消息内容
- * @apiParamExample {json} Request-Example:
- *     {
- *       "message": "要发送的消息"
- *     }
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200,
- *       "msg": "SUCCESS"
- *     }
- */
-app.post('/sendtg', async (req, res) => {
-  const { message } = req.body;  
-  
+//telegram消息发送接口
+app.get('/sendtg', async (req, res) => {
+  const { message } = req.query;  
   const msgStatus = await tgHookMsg(message);
-  
   res.send({code:200,msg:msgStatus});
-  
 });
 
-/**
- * @api {POST} /sendwxtemp 微信公众号消息发送接口
- * @apiName sendwxtemp
- * @apiGroup 发送消息
- * @apiBody  {String} message 消息内容
- * @apiParamExample {json} Request-Example:
- *     {
- *       "message": "要发送的消息"
- *     }
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200,
- *       "msg": "SUCCESS"
- *     }
- */
-app.post('/sendwxtemp', async (req, res) => {
-  const { message } = req.body;  
+//微信公众号消息发送接口
+app.get('/sendwxtemp', async (req, res) => {
+  const { message } = req.query;  
   const data = {
       "message": {
         "value": message
       }
     }
   const msgStatus = await sendTemplateMessage(data);
-  
   res.send({code:200,msg:msgStatus});
-  
 });
 
 
-/**
- * @api {POST} /sendbark bark发送接口
- * @apiName sendbark
- * @apiGroup 发送消息
- * @apiBody  {String} message 消息内容
- * @apiParamExample {json} Request-Example:
- *     {
- *       "message": "要发送的消息"
- *     }
- * @apiSuccess {Number} code 状态码 默认200
- * @apiSuccess {String} msg 发送状态 成功为SUCCESS 
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "code": 200,
- *       "msg": "SUCCESS"
- *     }
- */
-app.post('/sendbark', async (req, res) => {
-  const { message,to } = req.body;  
- 
+//bark发送接口
+app.get('/sendbark', async (req, res) => {
+  const { message,to } = req.query;  
   const msgStatus = await apnMsg(message,to);
-  
   res.send({code:200,msg:msgStatus});
   
 });
@@ -380,13 +227,10 @@ app.post('/sendbark', async (req, res) => {
 //个人微信发消息
 app.get('/sendmywx', async (req, res) => {
   const { to,message } = req.query;  
-  console.log(req.query);
-  
   const msgStatus = await myWxHookMsg(message,to);
-  
   res.send({code:200,msg:msgStatus});
   
 });
 
-// 启动express server 
+//启动express
 app.listen(80);
