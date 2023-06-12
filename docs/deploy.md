@@ -122,7 +122,7 @@ SLACK_HOOK_URL = 第5步拿到的url
 
 2.点击下面的一键部署按钮，根据提示，在【Configure Project】中填写对应的key值
 
-<a href="https://vercel.com/import/git?s=https://github.com/leafrainy/shici&env=WX_HOOK_KEY&env=WX_APPID&env=WX_APPSECRET&env=WX_OPENID&env=WX_TEMPLATEID&env=TG_BOT_TOKEN&env=TG_HOOK_URL&env=TG_CHAT_ID&env=SLACK_HOOK_URL&project-name=msgBot&repository-name=for-msgBot" target="_blank">
+<a href="https://vercel.com/import/git?s=https://github.com/leafrainy/msgBot&env=WX_HOOK_KEY&env=WX_APPID&env=WX_APPSECRET&env=WX_OPENID&env=WX_TEMPLATEID&env=TG_BOT_TOKEN&env=TG_HOOK_URL&env=TG_CHAT_ID&env=SLACK_HOOK_URL&project-name=msgBot&repository-name=for-msgBot" target="_blank">
   <img src="https://vercel.com/button" alt="Deploy with Vercel" />
 </a>
 
