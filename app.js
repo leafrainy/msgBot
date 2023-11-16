@@ -156,8 +156,6 @@ async function wxHookMsg(msg,type='text'){
     }
 } 
 
-
-
 //slack webhook调用
 async function slackHookMsg(msg){
     const webhook = `${SLACK_HOOK_URL}`;
